@@ -4,13 +4,41 @@ namespace App;
 
 class Authenticate
 {   
-
-
-    public function isValidEmail($email)
-    {
-
-        $pattern = '/^[^\s@]+@[^\s@]+\.[^\s@]+$/';
-        return preg_match($pattern, $email) === 1;
+        private function validatePassword($password) {
+        $errors = [];
+        
+        // Check minimum length
+        if (strlen($password) < 8) {
+            $errors[] = "Password must be at least 8 characters long";
+        }
+        
+        // Check for uppercase
+        if (!preg_match('/[A-Z]/', $password)) {
+            $errors[] = "Password must contain at least one uppercase letter";
+        }
+        
+        // Check for lowercase
+        if (!preg_match('/[a-z]/', $password)) {
+            $errors[] = "Password must contain at least one lowercase letter";
+        }
+        
+        // Check for numbers
+        if (!preg_match('/[0-9]/', $password)) {
+            $errors[] = "Password must contain at least one number";
+        }
+        
+        // Check for special characters
+        if (!preg_match('/[!@#$%^&*(),.?":{}|<>]/', $password)) {
+            $errors[] = "Password must contain at least one special character";
+        }
+        
+        // If there are any errors, join them and return as string
+        if (!empty($errors)) {
+            \App\Alert::PrintMessage(implode(", ", $errors), 'Danger');
+            return false;
+        }
+        
+        return true;
     }
 
     public function emailExists($email)
@@ -58,47 +86,73 @@ class Authenticate
 
     public function signUp()
     {
-        if (isset($_POST['signUpBtn'])) {
+        if (isset($_POST['signUpBtn']))
+        {
             $username = $_POST['username'];
             $email = $_POST['email'];
+            $confirmEmail  = $_POST['confirm_email'];
+            $password = $_POST['password'];
+            $confirmPassword = $_POST['confirm_password']; 
+            
+            // Store the values in session variables
+            // to retain them in case of validation errors
+            $_SESSION['username'] = $username;
+            $_SESSION['email'] = $email;   
+            $_SESSION['confirm_email'] = $confirmEmail;
+            $_SESSION['password'] = $password;
+            $_SESSION['confirm_password'] = $confirmPassword;
 
-
-            if ($this->usernameExists($username)) {
+            if ($this->usernameExists($username))
+            {
                 \App\Alert::PrintMessage("Username already exists", 'Danger');
                 return;
             }
             
-
-            if (!$this->isValidEmail($email)) {
-                \App\Alert::PrintMessage("Please enter a valid email address", 'Danger');
+            if ($email != $confirmEmail)
+            {
+ 
+                \App\Alert::PrintMessage("Email doesn't match", 'Danger');
                 return;
+            
             }
 
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) 
+            {
+                \App\Alert::PrintMessage("Please enter a valid email", 'Danger');
+                return;
+            }
             // Then check if email exists
-            if ($this->emailExists($email)) {
+            if ($this->emailExists($email))
+            {
                 \App\Alert::PrintMessage("Email already exists", 'Danger');
                 return;
             }
             
-            $password = $_POST['password'];
-            $confirmPassword = $_POST['confirm_password'];
-            if ($password != $confirmPassword)
-                \App\Alert::PrintMessage("Confirm Password not matched", 'Danger');
+            // Add password validation
+            if (!$this->validatePassword($password)) {
+                return;
+            }
+            
+            if ($password != $confirmPassword) {
+                \App\Alert::PrintMessage("Password doesn't match", 'Danger');
+                return;
+            }
             
             $myDatabaseObj = new \App\Database();
-            $insertStatement = "INSERT INTO `users` VALUES(NULL,?,?,?)"; // Sql injection
+            // Modified SQL to include signup_date column
+            $insertStatement = "INSERT INTO `users` VALUES(NULL,?,?,?,NOW())";
             $queryObj = $myDatabaseObj->conn->prepare($insertStatement);
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+            // Modified bind_param to include username, email, and hashed password
             $queryObj->bind_param('sss', $username, $email, $hashedPassword);
             $queryStatus = $queryObj->execute();
+            
             if ($queryStatus) {
-                
                 header('location: SignIn.php?doneSignUp=1');
-                Alert::PrintMessage("Done creating your account", 'Success');
-            }
-
-            else {
-                Alert::PrintMessage("Failed to create your account", 'Danger');
+                \App\Alert::PrintMessage("Done creating your account", 'Success');
+                exit();
+            } else {
+                \App\Alert::PrintMessage("Failed to create your account", 'Danger');
             }
         }
     }
@@ -108,16 +162,25 @@ class Authenticate
             $password = $_POST['password'];
             $email = $_POST['email'];
 
+            // Store the values in session variables
+            $_SESSION['email'] = $email;
+            $_SESSION['password'] = $password ; 
+
             if (empty($password) || empty($email)) {
                 \App\Alert::PrintMessage("Email or Password is required.", 'Danger');
                 return;
             }
 
-            if (!$this->isValidEmail($email)) {
-                \App\Alert::PrintMessage("Please enter a valid email address", 'Danger');
+            if (filter_var($email, FILTER_VALIDATE_EMAIL)) 
+            {
+                    $email = filter_var($email, FILTER_VALIDATE_EMAIL);
+            }    
+            else 
+            {  
+                \App\Alert::PrintMessage("Please enter a valid email", 'Danger');
                 return;
             }
-
+         
             $myDatabaseObj = new \App\Database();
             $query = "SELECT * FROM `users` WHERE email = ?";
             $queryObj = $myDatabaseObj->conn->prepare($query);
@@ -154,6 +217,4 @@ class Authenticate
             exit();
         }
     }
-    
-
 }

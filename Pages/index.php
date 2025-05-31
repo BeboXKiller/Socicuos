@@ -6,7 +6,6 @@
         $authObj->redirectIfNotAuth(); 
         $authObj->logOut();
 
-
 ?>
 
 <!DOCTYPE html>
@@ -16,6 +15,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Socicuos</title>      
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"></script>
 </head>
 
 
@@ -70,10 +71,6 @@
     </section>
 
     <!-- Footer -->
-    <footer class="bg-gray-900 text-white py-8">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <p>&copy; 2025 Socicuos. All rights reserved.</p>
-        </div>
-    </footer>
+     <?php require($_SERVER[ 'DOCUMENT_ROOT' ] . '/Socicuos/Pages/Layout/Footer.php'); ?>
 </body>
 </html>

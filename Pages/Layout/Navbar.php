@@ -3,8 +3,6 @@
     use App\Authenticate;
     $authObj = new Authenticate();
    
-    
-
     // Get current page name
     $currentPage = basename($_SERVER['PHP_SELF']);
 ?>
