@@ -8,6 +8,8 @@
         use App\Alert;
             $alertObj = new Alert();
             $alertObj->alertAfterSignUp();
+        use App\FormUtility;
+        
             
 
 ?>
@@ -37,19 +39,7 @@
                     <div class="space-y-4">
                         <div class="space-y-4">
                             <p class="text-sm text-gray-600 text-center">Sign in to your account</p> 
-                            
-                            <div class="space-y-2">
-                                <label for="email" class="block text-sm font-medium text-gray-700">Email:</label>
-                                <input 
-                                    type="email" 
-                                    id="email" 
-                                    name="email" 
-                                    value="<?php echo isset($_SESSION['email']) ? htmlspecialchars($_SESSION['email']) : ''; ?>"
-                                    required
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                > 
-                            </div>
-                            
+                            <?php echo FormUtility::textField('email', 'Email', 'email', true); ?>
                             <div class="space-y-2">
                                 <label for="password" class="block text-sm font-medium text-gray-700">Password:</label>
                                 <input 

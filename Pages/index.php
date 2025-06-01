@@ -17,6 +17,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script> -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"></script>
+    
 </head>
 
 
@@ -29,7 +30,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
-                    <h1 class="text-2xl font-bold text-blue-600">Socicuos</h1>
+                    <h1 class="text-4xl font-bold text-blue-600">Socicuos</h1>
                 </div>
                 <div class="flex items-center space-x-4">
                     <a href="SignIn.php" class="text-gray-600 hover:text-gray-900">Sign In</a>

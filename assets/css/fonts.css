@@ -1,0 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Exile&family=Noto+Serif+Dives+Akuru:wght@400;500;600&display=swap');
+
+.noto-serif-dives-akuru-regular {
+    font-family: 'Noto Serif Dives Akuru', serif;
+    font-weight: 400;
+}
+
+.noto-serif-dives-akuru-medium {
+    font-family: 'Noto Serif Dives Akuru', serif;
+    font-weight: 500;
+}
+
+.noto-serif-dives-akuru-semibold {
+    font-family: 'Noto Serif Dives Akuru', serif;
+    font-weight: 600;
+}

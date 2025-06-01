@@ -176,7 +176,10 @@ class Authenticate
     {
         if (isset($_POST['signInBtn'])) {
             $password = $_POST['password'] ?? '';
-            $email = $_POST['email'] ?? '';
+            $email = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL) ?? '';
+            $_SESSION['form_data'] = [
+                'email' => $email
+            ]; // Store only non-sensitive data in session
 
             if (empty($password) || empty($email)) {
                 \App\Alert::PrintMessage("Email or Password is required.", 'Danger');
