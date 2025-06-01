@@ -151,13 +151,10 @@ class Authenticate
                 \App\Alert::PrintMessage("Password doesn't match", 'Danger');
                 return;
             }
-            
-            $myDatabaseObj = new \App\Database();
-            // Modified SQL to include signup_date column
-            $insertStatement = "INSERT INTO `users` VALUES(NULL,?,?,?,NOW())";
+              $myDatabaseObj = new \App\Database();
+            $insertStatement = "INSERT INTO `users` (username, email, password, profile_pic, bio) VALUES (?, ?, ?, 'default.jpg', NULL)";
             $queryObj = $myDatabaseObj->conn->prepare($insertStatement);
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-            // Modified bind_param to include username, email, and hashed password
             $queryObj->bind_param('sss', $username, $email, $hashedPassword);
             $queryStatus = $queryObj->execute();
             
@@ -204,11 +201,13 @@ class Authenticate
 
             $resultObject = $queryObj->get_result();
             if ($resultObject->num_rows == 1) {
-                $rowArr = $resultObject->fetch_assoc();
-                if (password_verify($password, $rowArr["password"])) {
-                    // Store only non-sensitive session data
+                $rowArr = $resultObject->fetch_assoc();                if (password_verify($password, $rowArr["password"])) {
+                    // Store user data in session
                     $_SESSION['userID'] = $rowArr["id"]; 
                     $_SESSION['userName'] = $rowArr["username"];
+                    $_SESSION['profilePic'] = $rowArr["profile_pic"];
+                    $_SESSION['bio'] = $rowArr["bio"];
+                    $_SESSION['createdAt'] = $rowArr["created_at"];
                     
                     \App\Alert::PrintMessage("Welcome Back, " . $rowArr['username'], 'Normal');
                     header('location: index.php');

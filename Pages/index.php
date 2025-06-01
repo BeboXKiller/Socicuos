@@ -25,20 +25,6 @@
 <body class="bg-gray-50">
    
     <?php require($_SERVER[ 'DOCUMENT_ROOT' ] . '/Socicuos/Pages/Layout/Navbar.php'); ?>
-    <!-- Navigation -->
-    <nav class="bg-white shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <h1 class="text-4xl font-bold text-blue-600">Socicuos</h1>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <a href="SignIn.php" class="text-gray-600 hover:text-gray-900">Sign In</a>
-                    <a href="SignUp.php" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">Sign Up</a>
-                </div>
-            </div>
-        </div>
-    </nav>
 
     <!-- Hero Section -->
     <section class="bg-blue-600 text-white py-20">

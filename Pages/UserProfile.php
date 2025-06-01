@@ -30,7 +30,7 @@ $authObj->redirectIfNotAuth();
                         </span>
                     </div>
                     <div>
-                        <h1 class="text-2xl font-bold text-gray-900"><?php echo htmlspecialchars($_SESSION['userName']); ?></h1>
+                        <h1 class="text-2xl font-bold text-gray-900"><?php echo ucfirst(htmlspecialchars($_SESSION['userName'])); ?></h1>
                         <p class="text-gray-500">Member since <?php echo date('F Y'); ?></p>
                     </div>
                 </div>

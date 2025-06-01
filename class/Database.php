@@ -7,7 +7,7 @@ use  mysqli;
 
 class Database {
     private $host = 'localhost';
-    private $database = 'social';
+    private $database = 'social_network';
     private $username = 'root';
     private $password = '';
     public $conn;

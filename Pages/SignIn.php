@@ -4,10 +4,11 @@
         use App\Authenticate;
             $authObj = new Authenticate();
             $authObj->signIn();
-            $authObj->redirectIfAuth();
-        use App\Alert;
+            $authObj->redirectIfAuth();        use App\Alert;
             $alertObj = new Alert();
-            $alertObj->alertAfterSignUp();
+            if(isset($_GET['doneSignUp']) && $_GET['doneSignUp'] == 1) {
+                Alert::PrintMessage("Account created successfully! Please sign in.", 'Success');
+            }
         use App\FormUtility;
         
             
