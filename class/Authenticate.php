@@ -40,6 +40,19 @@ class Authenticate
         
         return true;
     }
+      public function checkUsernameAjax() {
+        if(isset($_POST['username'])) {
+            $username = $_POST['username'];
+            $exists = $this->usernameExists($username);
+            
+            header('Content-Type: application/json');
+            echo json_encode([
+                'exists' => $exists,
+                'message' => $exists ? 'Username already taken' : 'Username available'
+            ]);
+            exit();
+        }
+    }
 
     public function emailExists($email)
     {
@@ -88,19 +101,20 @@ class Authenticate
     {
         if (isset($_POST['signUpBtn']))
         {
-            $username = $_POST['username'];
-            $email = $_POST['email'];
-            $confirmEmail  = $_POST['confirm_email'];
-            $password = $_POST['password'];
-            $confirmPassword = $_POST['confirm_password']; 
+            $username = $_POST['username'] ?? '';
+            $email = $_POST['email'] ?? '';
+            $confirmEmail = $_POST['confirm_email'] ?? '';
             
-            // Store the values in session variables
-            // to retain them in case of validation errors
-            $_SESSION['username'] = $username;
-            $_SESSION['email'] = $email;   
-            $_SESSION['confirm_email'] = $confirmEmail;
-            $_SESSION['password'] = $password;
-            $_SESSION['confirm_password'] = $confirmPassword;
+            // Only store non-sensitive data in session
+            $_SESSION['form_data'] = [
+                'username' => $username,
+                'email' => $email,
+                'confirm_email' => $confirmEmail
+            ];
+
+            // Never store passwords in session
+            $password = $_POST['password'] ?? '';
+            $confirmPassword = $_POST['confirm_password'] ?? '';
 
             if ($this->usernameExists($username))
             {
@@ -150,6 +164,8 @@ class Authenticate
             if ($queryStatus) {
                 header('location: SignIn.php?doneSignUp=1');
                 \App\Alert::PrintMessage("Done creating your account", 'Success');
+                // Clean up session form data after use
+                unset($_SESSION['form_data']);
                 exit();
             } else {
                 \App\Alert::PrintMessage("Failed to create your account", 'Danger');
@@ -159,24 +175,15 @@ class Authenticate
     public function signIn()
     {
         if (isset($_POST['signInBtn'])) {
-            $password = $_POST['password'];
-            $email = $_POST['email'];
-
-            // Store the values in session variables
-            $_SESSION['email'] = $email;
-            $_SESSION['password'] = $password ; 
+            $password = $_POST['password'] ?? '';
+            $email = $_POST['email'] ?? '';
 
             if (empty($password) || empty($email)) {
                 \App\Alert::PrintMessage("Email or Password is required.", 'Danger');
                 return;
             }
 
-            if (filter_var($email, FILTER_VALIDATE_EMAIL)) 
-            {
-                    $email = filter_var($email, FILTER_VALIDATE_EMAIL);
-            }    
-            else 
-            {  
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 \App\Alert::PrintMessage("Please enter a valid email", 'Danger');
                 return;
             }
@@ -189,23 +196,25 @@ class Authenticate
             
             if (!$queryStatus) {
                 \App\Alert::PrintMessage('Something went wrong', 'Danger');
-            } else {
-                $resultObject = $queryObj->get_result();
-                if ($resultObject->num_rows == 1) {
-                    $rowArr = $resultObject->fetch_assoc();
-                    if (password_verify($password, $rowArr["password"])) {
-                        // Authenticated - Fix the session variable names
-                        $_SESSION['userID'] = $rowArr["id"]; 
-                        $_SESSION['userName'] = $rowArr["username"]; // Changed from name to username
-                        \App\Alert::PrintMessage("Welcome Back, " . $rowArr['username'], 'Normal');
-                        header('location: index.php');
-                        exit();
-                    } else {
-                        \App\Alert::PrintMessage('Wrong password', 'Danger');
-                    }
+                return;
+            }
+
+            $resultObject = $queryObj->get_result();
+            if ($resultObject->num_rows == 1) {
+                $rowArr = $resultObject->fetch_assoc();
+                if (password_verify($password, $rowArr["password"])) {
+                    // Store only non-sensitive session data
+                    $_SESSION['userID'] = $rowArr["id"]; 
+                    $_SESSION['userName'] = $rowArr["username"];
+                    
+                    \App\Alert::PrintMessage("Welcome Back, " . $rowArr['username'], 'Normal');
+                    header('location: index.php');
+                    exit();
                 } else {
-                    \App\Alert::PrintMessage('Email is not valid', 'Danger');
+                    \App\Alert::PrintMessage('Wrong password', 'Danger');
                 }
+            } else {
+                \App\Alert::PrintMessage('Email is not valid', 'Danger');
             }
         }
     }
@@ -217,4 +226,5 @@ class Authenticate
             exit();
         }
     }
+  
 }
