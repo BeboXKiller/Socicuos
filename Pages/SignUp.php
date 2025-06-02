@@ -18,7 +18,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Socicuos - Sign Up</title>      
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.slim.js" 
+    integrity="sha256-UgvvN8vBkgO0luPSUl2s8TIlOSYRoGFAX4jlCIm9Adc=" 
+    crossorigin="anonymous"></script>
     <script src="../assets/js/usernameValidator.js"></script>
+    <script src="../assets/js/alert.js"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             new UsernameValidator('username');
