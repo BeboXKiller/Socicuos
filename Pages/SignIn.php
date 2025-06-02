@@ -4,12 +4,12 @@
         use App\Authenticate;
             $authObj = new Authenticate();
             $authObj->signIn();
-            $authObj->redirectIfAuth();        use App\Alert;
+            $authObj->redirectIfAuth();        
+        use App\Alert;
             $alertObj = new Alert();
             $alertObj->alertAfterSignUp();
         use App\FormUtility;
         
-            
 
 ?>
 
@@ -20,11 +20,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Socicuos - Sign In</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script> 
     <script src="https://code.jquery.com/jquery-3.7.1.slim.js" 
     integrity="sha256-UgvvN8vBkgO0luPSUl2s8TIlOSYRoGFAX4jlCIm9Adc=" 
     crossorigin="anonymous"></script>
     <script src="../assets/js/alert.js"></script>
+    
 </head>
 <body class="bg-gray-100 min-h-screen">
     <?php require($_SERVER['DOCUMENT_ROOT'] . '/Socicuos/Pages/Layout/Navbar.php'); ?>

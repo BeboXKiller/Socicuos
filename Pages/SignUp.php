@@ -1,10 +1,9 @@
 <?php
     require_once('../vendor/autoload.php');
     use App\Authenticate;
-    $authObj = new Authenticate();
-    $authObj->redirectIfAuth();
-    $authObj->signUp(); 
-
+        $authObj = new Authenticate();
+        $authObj->redirectIfAuth();
+        $authObj->signUp(); 
     use App\FormUtility;
 
 
@@ -18,17 +17,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Socicuos - Sign Up</title>      
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://kit.fontawesome.com/c68c5c4d75.js" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.slim.js" 
     integrity="sha256-UgvvN8vBkgO0luPSUl2s8TIlOSYRoGFAX4jlCIm9Adc=" 
     crossorigin="anonymous"></script>
     <script src="../assets/js/usernameValidator.js"></script>
     <script src="../assets/js/alert.js"></script>
+    <script src="../assets/js/passwordValidator.js"></script>
+    <script src="https://kit.fontawesome.com/c68c5c4d75.js" crossorigin="anonymous"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            new PasswordValidator('password');
+        });
+    </script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             new UsernameValidator('username');
         });
     </script>
+
 </head>
 <body class="bg-gray-100 min-h-screen">
     <?php require($_SERVER['DOCUMENT_ROOT'] . '/Socicuos/Pages/Layout/Navbar.php'); ?>

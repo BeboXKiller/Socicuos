@@ -52,6 +52,44 @@ class Authenticate
             ]);
             exit();
         }
+    }    public function validatePasswordAjax() {
+        if(isset($_POST['password'])) {
+            $password = $_POST['password'];
+            
+            $errors = [];
+            
+            // Check minimum length
+            if (strlen($password) < 8) {
+                $errors[] = "Password must be at least 8 characters long";
+            }
+            
+            // Check for uppercase
+            if (!preg_match('/[A-Z]/', $password)) {
+                $errors[] = "Password must contain at least one uppercase letter";
+            }
+            
+            // Check for lowercase
+            if (!preg_match('/[a-z]/', $password)) {
+                $errors[] = "Password must contain at least one lowercase letter";
+            }
+            
+            // Check for numbers
+            if (!preg_match('/[0-9]/', $password)) {
+                $errors[] = "Password must contain at least one number";
+            }
+            
+            // Check for special characters
+            if (!preg_match('/[!@#$%^&*(),.?":{}|<>]/', $password)) {
+                $errors[] = "Password must contain at least one special character";
+            }
+            
+            header('Content-Type: application/json');
+            echo json_encode([
+                'isValid' => empty($errors),
+                'errors' => $errors
+            ]);
+            exit();
+        }
     }
 
     public function emailExists($email)

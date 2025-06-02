@@ -15,9 +15,11 @@ $authObj->redirectIfNotAuth();
     <title>Your Profile - Socicuos</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="/Socicuos/assets/css/fonts.css">
-    <script src="https://code.jquery.com/jquery-3.7.1.slim.js" 
+    <script 
+    src="https://code.jquery.com/jquery-3.7.1.slim.js" 
     integrity="sha256-UgvvN8vBkgO0luPSUl2s8TIlOSYRoGFAX4jlCIm9Adc=" 
     crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/c68c5c4d75.js" crossorigin="anonymous"></script>
 </head>
 <body class="bg-gray-100 min-h-screen">
     <?php require($_SERVER['DOCUMENT_ROOT'] . '/Socicuos/Pages/Layout/Navbar.php'); ?>

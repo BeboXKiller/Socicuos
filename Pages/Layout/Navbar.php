@@ -12,6 +12,7 @@
     <script src="https://code.jquery.com/jquery-3.7.1.slim.js" 
     integrity="sha256-UgvvN8vBkgO0luPSUl2s8TIlOSYRoGFAX4jlCIm9Adc=" 
     crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/c68c5c4d75.js" crossorigin="anonymous"></script>
 </head>
 <nav class="bg-white shadow-sm fixed w-full top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

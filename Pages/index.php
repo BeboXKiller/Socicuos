@@ -20,6 +20,7 @@
     integrity="sha256-UgvvN8vBkgO0luPSUl2s8TIlOSYRoGFAX4jlCIm9Adc=" 
     crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"></script>
+    <script src="https://kit.fontawesome.com/c68c5c4d75.js" crossorigin="anonymous"></script>
     
 </head>
 
