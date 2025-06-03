@@ -189,7 +189,7 @@ class Authenticate
                 \App\Alert::PrintMessage("Password doesn't match", 'Danger');
                 return;
             }
-              $myDatabaseObj = new \App\Database();
+            $myDatabaseObj = new \App\Database();
             $insertStatement = "INSERT INTO `users` (username, email, password, profile_pic, bio) VALUES (?, ?, ?, 'default.jpg', NULL)";
             $queryObj = $myDatabaseObj->conn->prepare($insertStatement);
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);

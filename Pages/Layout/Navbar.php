@@ -2,6 +2,7 @@
     require_once($_SERVER['DOCUMENT_ROOT'] . '/Socicuos/vendor/autoload.php');
     use App\Authenticate;
     $authObj = new Authenticate();
+    $authObj->logOut();
    
     // Get current page name
     $currentPage = basename($_SERVER['PHP_SELF']);

@@ -1,9 +1,13 @@
 <?php
 require_once('../vendor/autoload.php');
 
-use App\Authenticate;
-$authObj = new Authenticate();
-$authObj->redirectIfNotAuth();
+    use App\Authenticate;
+        $authObj = new Authenticate();
+        $authObj->redirectIfNotAuth();
+    use App\User;
+        $userObj = new User();
+        $userObj->getUserProfile($_SESSION['userID']);
+        
 
 ?>
 
@@ -19,7 +23,9 @@ $authObj->redirectIfNotAuth();
     src="https://code.jquery.com/jquery-3.7.1.slim.js" 
     integrity="sha256-UgvvN8vBkgO0luPSUl2s8TIlOSYRoGFAX4jlCIm9Adc=" 
     crossorigin="anonymous"></script>
-    <script src="https://kit.fontawesome.com/c68c5c4d75.js" crossorigin="anonymous"></script>
+    <!-- <script src="https://kit.fontawesome.com/c68c5c4d75.js" crossorigin="anonymous"></script> -->
+    <script src="../assets/js/fontawesome.js"></script>
+    <script src="../assets/js/brands.js"></script>
 </head>
 <body class="bg-gray-100 min-h-screen">
     <?php require($_SERVER['DOCUMENT_ROOT'] . '/Socicuos/Pages/Layout/Navbar.php'); ?>
@@ -35,19 +41,43 @@ $authObj->redirectIfNotAuth();
                         </span>
                     </div>
                     <div>
-                        <h1 class="text-2xl font-bold text-gray-900"><?php echo ucfirst(htmlspecialchars($_SESSION['userName'])); ?></h1>
+                        <div calss="ml-auto">
+                        <span class="text-gray-500">
+                            <i class="fas fa-user"></i> 
+                            <?php echo htmlspecialchars($_SESSION['userName']); ?>
+                        </span>
+                    
+                        <!-- <h1 class="text-2xl font-bold text-gray-900"><?php echo ucfirst(htmlspecialchars($_SESSION['userName'])); ?></h1> -->
                         <p class="text-gray-500">Member since <?php echo date('F Y'); ?></p>
                     </div>
+                </div> 
+                <div class="ml-auto">
+                        <a href="EditProfile.php" class="text-blue-600 hover:text-blue-800 font-semibold">Edit Profile</a>
                 </div>
+              
+                    
+                    
+
             </div>
-            
             <!-- Profile Content -->
             <div class="p-6">
-                <h2 class="text-lg font-semibold text-gray-900 mb-4">Profile Information</h2>
-                <!-- Add more profile content here -->
+                        <h2 class="text-lg font-semibold text-gray-900 mb-4">About</h2>
+                        <!-- Add more profile content here -->
+                        <div class="space-y-2">
+                            <span class="text-zinc-600">
+                                <i class=""></i> 
+                                <?php echo htmlspecialchars($_SESSION['bio']) ?>
+                            </span>
+                        </div>
+
             </div>
+            
+            
+            
+            
         </div>
     </div>
+   
 
     <?php require($_SERVER['DOCUMENT_ROOT'] . '/Socicuos/Pages/Layout/Footer.php'); ?>
 </body>
