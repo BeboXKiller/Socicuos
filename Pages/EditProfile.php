@@ -1,31 +1,47 @@
 <?php
 require_once('../vendor/autoload.php');
 
-    use App\Authenticate;
-        $authObj = new Authenticate();
+use App\Authenticate;
+use App\FormUtility;
+use App\User;
+use App\Alert;
+
+// Check authentication
+    $authObj = new Authenticate();
         $authObj->redirectIfNotAuth();
-        
-    use App\FormUtility;
-        $formUtility = new FormUtility();    use App\User;
+
+    // Initialize objects
+    $formUtility = new FormUtility();
         $userObj = new User();
+
+        // Handle form submission
         if (isset($_POST['editProfileBtn'])) {
             $updatedData = $userObj->updateProfileInfo($_SESSION['userID'], $_POST);
-            if ($updatedData) {
-                // Update session data with new values
-                $_SESSION['userName'] = $updatedData['username'];
-                $_SESSION['bio'] = $updatedData['bio'];
-                $_SESSION['email'] = $updatedData['email'];
+            
+            if ($updatedData === false) {
+                Alert::PrintMessage("Error updating profile", 'Error');
+            } elseif ($updatedData === true) {
+                Alert::PrintMessage("No changes were made to your profile", 'Info');
+            } elseif (is_array($updatedData)) {
+                // Update session with new values
+                if (isset($updatedData['username'])) {
+                    $_SESSION['userName'] = $updatedData['username'];
+                }
+                if (isset($updatedData['bio'])) {
+                    $_SESSION['bio'] = $updatedData['bio'];
+                }
+                if (isset($updatedData['email'])) {
+                    $_SESSION['email'] = $updatedData['email'];
+                }
                 if (isset($updatedData['profile_pic'])) {
                     $_SESSION['profile_pic'] = $updatedData['profile_pic'];
                 }
-                
-                \App\Alert::PrintMessage("Profile updated successfully", 'Success');
-            } else {
-                \App\Alert::PrintMessage("No changes were made to your profile", 'Info');
+                Alert::PrintMessage("Profile updated successfully", 'Success');
             }
         }
-        
-        
+
+// Get current profile data
+$userProfile = $userObj->getUserProfile($_SESSION['userID']);
 ?>
 
 <!DOCTYPE html>

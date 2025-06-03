@@ -9,11 +9,11 @@
 ?>
 <head>
     <link rel="stylesheet" href="/Socicuos/assets/css/fonts.css">
-    <link rel="stylesheet" href="/Socicuos/assets/css/tailwind.css">
-    <script src="https://code.jquery.com/jquery-3.7.1.slim.js" 
-    integrity="sha256-UgvvN8vBkgO0luPSUl2s8TIlOSYRoGFAX4jlCIm9Adc=" 
+    <link rel="stylesheet" href="/Socicuos/assets/css/tailwind.css">    <script src="https://code.jquery.com/jquery-3.7.1.min.js" 
+    integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" 
     crossorigin="anonymous"></script>
     <script src="https://kit.fontawesome.com/c68c5c4d75.js" crossorigin="anonymous"></script>
+    <script src="/Socicuos/assets/js/search.js"></script>
 </head>
 <nav class="bg-white shadow-sm fixed w-full top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -47,22 +47,26 @@
                             Sign Up
                         </a>
                     </div>
-                <?php else: ?>
-                    <!-- Search Bar -->
+                <?php else: ?>                    <!-- Search Bar -->
                     <div class="max-w-xl w-full">
                         <div class="relative">
                             <input 
+                                id="searchInput"
                                 type="text" 
-                                placeholder="Search people or posts..." 
+                                placeholder="Search people..." 
                                 class="w-full my-2 bg-gray-50 border border-gray-300 rounded-full px-5 py-2.5 pr-12 
                                        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 
                                        transition-colors"
+                                autocomplete="off"
                             >
                             <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
                                 <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                     <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
                                 </svg>
                             </div>
+                            
+                            <!-- Search Results -->
+                            <div id="searchResults" class="hidden absolute w-full bg-white mt-1 rounded-md shadow-lg border border-gray-200 max-h-96 overflow-y-auto z-50"></div>
                         </div>
                     </div>
             </div>
