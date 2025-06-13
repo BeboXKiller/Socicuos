@@ -9,19 +9,28 @@ namespace App;
 
 class User
 {
-    
     private $table = 'users';
+    protected $conn;
+
+    public function __construct() {
+        $myDatabaseObj = new \App\Database();
+        $this->conn = $myDatabaseObj->conn;
+    }
 
     public function getUserProfile($userId) 
     {
         $query = "SELECT id, username, email, profile_pic, bio, created_at 
                  FROM " . $this->table . " 
                  WHERE id = ?";
-        $myDatabaseObj = new \App\Database();   
-        $queryObj = $myDatabaseObj->conn->prepare($query);
-        $queryObj->bind_param("i", $userId);
-        $queryObj->execute();
-        $result = $queryObj->get_result();
+        
+        $stmt = $this->conn->prepare($query);
+        if (!$stmt) {
+            throw new \Exception("Prepare failed: " . $this->conn->error);
+        }
+        
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
         
         return $result->fetch_assoc();
     }
@@ -34,24 +43,27 @@ class User
                  WHERE username LIKE ? 
                  AND id != ? 
                  LIMIT 20";
-        $myDatabaseObj = new \App\Database();
-        $queryObj = $myDatabaseObj->conn->prepare($query);
+        
+        $stmt = $this->conn->prepare($query);
+        if (!$stmt) {
+            throw new \Exception("Prepare failed: " . $this->conn->error);
+        }
+        
         $searchTerm = "%{$searchTerm}%";
-        $queryObj->bind_param("si", $searchTerm, $currentUserId);
-        $queryObj->execute();
-        $result = $queryObj->get_result();
+        $stmt->bind_param("si", $searchTerm, $currentUserId);
+        $stmt->execute();
+        $result = $stmt->get_result();
         
         return $result->fetch_all(MYSQLI_ASSOC);
-    }    // Update profile    public function updateProfileInfo($userId, $data) {
-        
+    }
+
+    // Update profile
     public function updateProfileInfo($userId, $data) {
-        // Get current user data to compare changes
         $currentData = $this->getUserProfile($userId);
         if (!$currentData) {
             return false;
         }
 
-        // Define all allowed fields and their types
         $fieldTypes = [
             'username' => 's',
             'email' => 's',
@@ -63,23 +75,18 @@ class User
         $values = [];
         $types = "";
 
-        // Only process fields that have actually changed
         foreach ($data as $field => $newValue) {
-            // Skip non-updatable fields
             if (!isset($fieldTypes[$field])) {
                 continue;
             }
 
-            // Handle empty values
             if ($field === 'bio') {
-                // Bio can be empty
                 if ($currentData[$field] !== $newValue) {
                     $updates[] = "{$field} = ?";
                     $values[] = $newValue;
                     $types .= $fieldTypes[$field];
                 }
             } else {
-                // Other fields can't be empty
                 if (!empty(trim($newValue)) && $currentData[$field] !== $newValue) {
                     $updates[] = "{$field} = ?";
                     $values[] = $newValue;
@@ -88,36 +95,32 @@ class User
             }
         }
 
-        // If no fields have changed or all values were invalid
         if (empty($updates)) {
-            return true; // No changes needed
+            return true;
         }
 
-        // Prepare and execute update query
         $query = "UPDATE " . $this->table . " SET " . implode(', ', $updates) . " WHERE id = ?";
-        $myDatabaseObj = new \App\Database();
-        $queryObj = $myDatabaseObj->conn->prepare($query);
+        $stmt = $this->conn->prepare($query);
+        if (!$stmt) {
+            throw new \Exception("Prepare failed: " . $this->conn->error);
+        }
 
-        // Add userId to values and types
         $values[] = $userId;
         $types .= "i";
 
-        // Bind parameters
         $refs = array();
         $refs[] = $types;
         foreach ($values as $key => $value) {
             $refs[] = &$values[$key];
         }
-        call_user_func_array(array($queryObj, 'bind_param'), $refs);
+        call_user_func_array(array($stmt, 'bind_param'), $refs);
 
-        // Execute update
-        $success = $queryObj->execute();
+        $success = $stmt->execute();
         
         if (!$success) {
             return false;
         }
 
-        // Return the updated user data
         return $this->getUserProfile($userId);
     }
 }

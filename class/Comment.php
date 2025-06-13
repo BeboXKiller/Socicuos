@@ -1,7 +1,6 @@
 <?php
 
 namespace App;
-use PDO;
 /**
  * Comment class handles comments on posts
  * 
@@ -17,26 +16,33 @@ class Comment {
     }    // Add comment to post
     public function addComment($postId, $userId, $content) {
         $query = "INSERT INTO " . $this->table . " (post_id, user_id, content) 
-                 VALUES (:post_id, :user_id, :content)";
+                 VALUES (?, ?, ?)";
         
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':post_id', $postId);
-        $stmt->bindParam(':user_id', $userId);
-        $stmt->bindParam(':content', $content);
+        if (!$stmt) {
+            throw new \Exception("Prepare failed: " . $this->conn->error);
+        }
+        
+        $stmt->bind_param("iis", $postId, $userId, $content);
         
         return $stmt->execute();
-    }    // Get comments for a post
+    }    // Get comments for a post    
     public function getComments($postId) {
         $query = "SELECT c.*, u.username, u.profile_pic 
                  FROM " . $this->table . " c 
                  INNER JOIN users u ON c.user_id = u.id 
-                 WHERE c.post_id = :post_id 
+                 WHERE c.post_id = ? 
                  ORDER BY c.created_at ASC";
         
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':post_id', $postId);
-        $stmt->execute();
+        if (!$stmt) {
+            throw new \Exception("Prepare failed: " . $this->conn->error);
+        }
         
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmt->bind_param("i", $postId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        return $result->fetch_all(MYSQLI_ASSOC);
     }
 }
