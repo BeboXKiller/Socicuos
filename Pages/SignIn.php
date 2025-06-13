@@ -30,10 +30,10 @@
 <body class="bg-gray-100 min-h-screen">
     <?php require($_SERVER['DOCUMENT_ROOT'] . '/Socicuos/Pages/Layout/Navbar.php'); ?>
 
-    <div class="flex min-h-screen">
+    <div class="flex flex-col lg:flex-row min-h-screen">
         <!-- Left Side - Form -->
-        <div class="w-1/2 p-8 flex items-center justify-center">
-            <form method="post" class="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
+        <div class="w-full lg:w-1/2 p-4 lg:p-8 flex items-center justify-center">
+            <form method="post" class="bg-white p-6 lg:p-8 mt-15 rounded-lg shadow-lg w-full max-w-md">
                 <div class="space-y-6">
                     <div class="text-center">
                         <p class="text-2xl font-bold text-gray-900">Sign In</p>
@@ -74,25 +74,26 @@
             </form>
         </div>
 
+        
         <!-- Right Side - Image and Footer -->
-         <div class="w-5/6 bg-zinc-900 flex flex-col">
+        <div class=" lg:block lg:w-2/3 lg:h-screen bg-zinc-900 flex flex-col">
             <!-- Image Section -->
             <div class="flex-1 p-0.5 py-0">
-                <div class="h-full bg-gray-100 overflow-hidden">
-                    <img 
-                        src="../assets/img/pic4.AVIF" 
-                        alt="Connect with friends" 
-                        class="w-full h-full object-cover"
-                    >
+                    <div class="lg:h-2/3 bg-gray-100 overflow-hidden">
+                        <img 
+                            src="../assets/img/pic4.AVIF" 
+                            alt="Connect with friends" 
+                            class="w-full h-full object-cover"
+                        >
+                    </div>
+                </div>
+                
+                <!-- Footer Section -->
+                <div class="lg:h-0.5 flex ">
+                    <?php require($_SERVER['DOCUMENT_ROOT'] . '/Socicuos/Pages/Layout/Footer.php'); ?>
                 </div>
             </div>
-            
-            <!-- Footer Section -->
-            <div class="h-2/6 flex">
-            <?php require($_SERVER[ 'DOCUMENT_ROOT' ] . '/Socicuos/Pages/Layout/Footer.php'); ?>
-            </div>
         </div>
-        </div>
-    </div>        
+    </div>
 </body>
 </html>

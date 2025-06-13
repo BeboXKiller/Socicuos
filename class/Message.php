@@ -2,8 +2,6 @@
 
 namespace App;
 
-use PDO;
-
 class Message {
     private $conn;
     private $table = 'messages';
@@ -16,12 +14,14 @@ class Message {
     public function sendMessage($senderId, $receiverId, $message) {
         $query = "INSERT INTO " . $this->table . " 
                  (sender_id, receiver_id, message) 
-                 VALUES (:sender_id, :receiver_id, :message)";
+                 VALUES (?, ?, ?)";
         
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':sender_id', $senderId);
-        $stmt->bindParam(':receiver_id', $receiverId);
-        $stmt->bindParam(':message', $message);
+        if (!$stmt) {
+            throw new \Exception("Prepare failed: " . $this->conn->error);
+        }
+        
+        $stmt->bind_param("iis", $senderId, $receiverId, $message);
         
         return $stmt->execute();
     }
@@ -31,18 +31,21 @@ class Message {
         $query = "SELECT m.*, u.username, u.profile_pic 
                  FROM " . $this->table . " m 
                  INNER JOIN users u ON m.sender_id = u.id 
-                 WHERE (m.sender_id = :user_id AND m.receiver_id = :other_user_id) OR 
-                       (m.sender_id = :other_user_id AND m.receiver_id = :user_id) 
+                 WHERE (m.sender_id = ? AND m.receiver_id = ?) OR 
+                       (m.sender_id = ? AND m.receiver_id = ?) 
                  ORDER BY m.created_at DESC 
-                 LIMIT :limit";
+                 LIMIT ?";
         
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':user_id', $userId);
-        $stmt->bindParam(':other_user_id', $otherUserId);
-        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
-        $stmt->execute();
+        if (!$stmt) {
+            throw new \Exception("Prepare failed: " . $this->conn->error);
+        }
         
-        return array_reverse($stmt->fetchAll(PDO::FETCH_ASSOC));
+        $stmt->bind_param("iiiii", $userId, $otherUserId, $otherUserId, $userId, $limit);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        return array_reverse($result->fetch_all(MYSQLI_ASSOC));
     }
 
     // Get user's recent conversations
@@ -57,12 +60,12 @@ class Message {
                  FROM (
                     SELECT 
                         CASE 
-                            WHEN sender_id = :user_id THEN receiver_id
+                            WHEN sender_id = ? THEN receiver_id
                             ELSE sender_id
                         END as other_id,
                         MAX(id) as last_message_id
                     FROM messages
-                    WHERE sender_id = :user_id OR receiver_id = :user_id
+                    WHERE sender_id = ? OR receiver_id = ?
                     GROUP BY other_id
                  ) as latest
                  JOIN messages m ON m.id = latest.last_message_id
@@ -70,21 +73,29 @@ class Message {
                  ORDER BY m.created_at DESC";
         
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':user_id', $userId);
-        $stmt->execute();
+        if (!$stmt) {
+            throw new \Exception("Prepare failed: " . $this->conn->error);
+        }
         
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmt->bind_param("iii", $userId, $userId, $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        return $result->fetch_all(MYSQLI_ASSOC);
     }
 
     // Mark message as read
     public function markAsRead($messageId, $userId) {
         $query = "UPDATE " . $this->table . " 
                  SET is_read = 1 
-                 WHERE id = :message_id AND receiver_id = :user_id";
+                 WHERE id = ? AND receiver_id = ?";
         
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':message_id', $messageId);
-        $stmt->bindParam(':user_id', $userId);
+        if (!$stmt) {
+            throw new \Exception("Prepare failed: " . $this->conn->error);
+        }
+        
+        $stmt->bind_param("ii", $messageId, $userId);
         
         return $stmt->execute();
     }

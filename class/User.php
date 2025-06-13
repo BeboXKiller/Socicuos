@@ -1,8 +1,6 @@
 <?php
 
-
 namespace App;
-use PDO;
 /**
  * User class handles user profile and search functionalities
  * 
@@ -11,67 +9,118 @@ use PDO;
 
 class User
 {
-    private $conn;
     private $table = 'users';
+    protected $conn;
 
-    public function __construct($db) {
-        $this->conn = $db;
-    }    public function getProfile($userId) {
+    public function __construct() {
+        $myDatabaseObj = new \App\Database();
+        $this->conn = $myDatabaseObj->conn;
+    }
+
+    public function getUserProfile($userId) 
+    {
         $query = "SELECT id, username, email, profile_pic, bio, created_at 
                  FROM " . $this->table . " 
-                 WHERE id = :id";
+                 WHERE id = ?";
         
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':id', $userId);
-        $stmt->execute();
+        if (!$stmt) {
+            throw new \Exception("Prepare failed: " . $this->conn->error);
+        }
         
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        return $result->fetch_assoc();
     }
 
     // Search users
-    public function searchUsers($searchTerm, $currentUserId) {
+    public function searchUsers($searchTerm, $currentUserId) 
+    {
         $query = "SELECT id, username, profile_pic 
                  FROM " . $this->table . " 
-                 WHERE username LIKE :search 
-                 AND id != :current_user 
+                 WHERE username LIKE ? 
+                 AND id != ? 
                  LIMIT 20";
         
         $stmt = $this->conn->prepare($query);
-        $searchTerm = "%{$searchTerm}%";
-        $stmt->bindParam(':search', $searchTerm);
-        $stmt->bindParam(':current_user', $currentUserId);
-        $stmt->execute();
+        if (!$stmt) {
+            throw new \Exception("Prepare failed: " . $this->conn->error);
+        }
         
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $searchTerm = "%{$searchTerm}%";
+        $stmt->bind_param("si", $searchTerm, $currentUserId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        return $result->fetch_all(MYSQLI_ASSOC);
     }
 
     // Update profile
-    public function updateProfile($userId, $data) {
-        $allowedFields = ['username', 'email', 'bio', 'profile_pic'];
-        $updates = [];
-        $params = [];
+    public function updateProfileInfo($userId, $data) {
+        $currentData = $this->getUserProfile($userId);
+        if (!$currentData) {
+            return false;
+        }
 
-        foreach ($data as $field => $value) {
-            if (in_array($field, $allowedFields)) {
-                $updates[] = "{$field} = :{$field}";
-                $params[":{$field}"] = $value;
+        $fieldTypes = [
+            'username' => 's',
+            'email' => 's',
+            'bio' => 's',
+            'profile_pic' => 's'
+        ];
+
+        $updates = [];
+        $values = [];
+        $types = "";
+
+        foreach ($data as $field => $newValue) {
+            if (!isset($fieldTypes[$field])) {
+                continue;
+            }
+
+            if ($field === 'bio') {
+                if ($currentData[$field] !== $newValue) {
+                    $updates[] = "{$field} = ?";
+                    $values[] = $newValue;
+                    $types .= $fieldTypes[$field];
+                }
+            } else {
+                if (!empty(trim($newValue)) && $currentData[$field] !== $newValue) {
+                    $updates[] = "{$field} = ?";
+                    $values[] = $newValue;
+                    $types .= $fieldTypes[$field];
+                }
             }
         }
 
         if (empty($updates)) {
+            return true;
+        }
+
+        $query = "UPDATE " . $this->table . " SET " . implode(', ', $updates) . " WHERE id = ?";
+        $stmt = $this->conn->prepare($query);
+        if (!$stmt) {
+            throw new \Exception("Prepare failed: " . $this->conn->error);
+        }
+
+        $values[] = $userId;
+        $types .= "i";
+
+        $refs = array();
+        $refs[] = $types;
+        foreach ($values as $key => $value) {
+            $refs[] = &$values[$key];
+        }
+        call_user_func_array(array($stmt, 'bind_param'), $refs);
+
+        $success = $stmt->execute();
+        
+        if (!$success) {
             return false;
         }
 
-        $query = "UPDATE " . $this->table . " 
-                 SET " . implode(', ', $updates) . " 
-                 WHERE id = :id";
-        
-        $stmt = $this->conn->prepare($query);
-        foreach ($params as $key => $value) {
-            $stmt->bindValue($key, $value);
-        }
-        $stmt->bindParam(':id', $userId);
-        
-        return $stmt->execute();
+        return $this->getUserProfile($userId);
     }
 }

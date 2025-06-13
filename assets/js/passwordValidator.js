@@ -1,75 +1,70 @@
-class PasswordValidator {
-    constructor(inputId) {
-        this.input = document.getElementById(inputId);
-        this.setupValidator();
-    }
+$(document).ready(function() {
+    class PasswordValidator {
+        constructor(inputId) {
+            this.$input = $(`#${inputId}`);
+            this.setupValidator();
+        }
 
-    setupValidator() {
-        // Create wrapper for the input and feedback
-        const wrapper = document.createElement('div');
-        wrapper.className = 'relative';
-        
-        // Create feedback element
-        const feedbackEl = document.createElement('div');
-        feedbackEl.className = 'mt-1 text-sm hidden';
-        
-        // Insert elements into DOM
-        this.input.parentNode.insertBefore(wrapper, this.input);
-        wrapper.appendChild(this.input);
-        wrapper.appendChild(feedbackEl);
+        setupValidator() {
+            // Create wrapper for the input and feedback
+            this.$input.wrap('<div class="relative"></div>');
+            this.$wrapper = this.$input.parent();
+            this.$feedbackEl = $('<div>')
+                .addClass('mt-1 text-sm hidden')
+                .insertAfter(this.$input);
 
-        this.setupEventListeners(feedbackEl);
-    }
+            this.setupEventListeners();
+        }
 
-    setupEventListeners(feedbackEl) {
-        let debounceTimer;
+        setupEventListeners() {
+            let debounceTimer;
 
-        this.input.addEventListener('input', () => {
-            clearTimeout(debounceTimer);
-            const password = this.input.value;
+            this.$input.on('input', () => {
+                clearTimeout(debounceTimer);
+                const password = this.$input.val();
 
-            if (password.length === 0) {
-                feedbackEl.className = 'mt-1 text-sm hidden';
-                return;
-            }
+                if (password.length === 0) {
+                    this.$feedbackEl.addClass('hidden');
+                    return;
+                }
 
-            debounceTimer = setTimeout(() => {
-                this.validatePassword(password, feedbackEl);
-            }, 500);
-        });
-    }
-
-    async validatePassword(password, feedbackEl) {
-        try {
-            const response = await fetch('/Socicuos/ajax/validatePassword.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `password=${encodeURIComponent(password)}`
+                debounceTimer = setTimeout(() => {
+                    this.validatePassword(password);
+                }, 500);
             });
+        }
 
-            if (!response.ok) throw new Error('Network response was not ok');
-            
-            const data = await response.json();
-            
-            if (data.isValid) {
-                this.updateFeedback(feedbackEl, 'Password is good', 'green');
-                return;
-            }
+        validatePassword(password) {
+            $.ajax({
+                url: '/Socicuos/ajax/validatePassword.php',
+                method: 'POST',
+                data: { password: password },
+                success: (data) => {
+                    if (data.isValid) {
+                        this.updateFeedback('Password is good', 'green');
+                        return;
+                    }
 
-            // Show the first error message
-            if (data.errors && data.errors.length > 0) {
-                this.updateFeedback(feedbackEl, data.errors[0], 'red');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            this.updateFeedback(feedbackEl, 'Error checking password', 'red');
+                    // Show the first error message
+                    if (data.errors && data.errors.length > 0) {
+                        this.updateFeedback(data.errors[0], 'red');
+                    }
+                },
+                error: (xhr, status, error) => {
+                    console.error('Error:', error);
+                    this.updateFeedback('Error checking password', 'red');
+                }
+            });
+        }
+
+        updateFeedback(message, color) {
+            this.$feedbackEl
+                .removeClass('hidden')
+                .attr('class', `mt-1 text-sm text-${color}-600`)
+                .text(message);
         }
     }
 
-    updateFeedback(element, message, color) {
-        element.className = `mt-1 text-sm text-${color}-600`;
-        element.textContent = message;
-    }
-}
+    // Initialize validation for password input
+    new PasswordValidator('password');
+});
