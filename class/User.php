@@ -99,7 +99,7 @@ class User
             return true;
         }
 
-        $query = "UPDATE " . $this->table . " SET " . implode(', ', $updates) . " WHERE id = ?";
+        $query = "UPDATE {$this->table} SET " . implode(', ', $updates) . "WHERE id = ?";
         $stmt = $this->conn->prepare($query);
         if (!$stmt) {
             throw new \Exception("Prepare failed: " . $this->conn->error);
@@ -123,4 +123,50 @@ class User
 
         return $this->getUserProfile($userId);
     }
+
+    public function deleteOrDeactivateAccount($userId, $method) {
+        
+        if($method === "delete_user") {
+            try {
+            $query = "DELETE FROM {$this->table} WHERE id = ?";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bind_param('i', $userId);
+            $queryStatus = $stmt->execute();
+
+            if($queryStatus) {
+
+                header('location: SignIn.php');
+                \App\Alert::PrintMessage("Account Deleted Successfully", 'Success');
+                session_unset();
+                session_destroy();
+                exit();
+
+            } else {
+                throw new \Exception("Something Wrong Happend");
+            }
+            } catch (\Exception $e) {
+            \App\Alert::PrintMessage($e->getMessage(), 'Danger');
+        }
+        } elseif ($method === 'deactivate_user') {
+            try {
+
+                $query = "UPDATE {$this->table} SET is_closed = ? WHERE id = ?";
+                $stmt = $this->conn->prepare($query);
+                $stmt->bind_param('ii', 1 ,$userId);
+                $queryStatus = $stmt->execute();
+
+            if($queryStatus) {
+
+                \App\Alert::PrintMessage("Account Deactivated Successfully", 'Success');
+
+            } else {
+                throw new \Exception("Something Wrong Happend");
+            }
+            } catch (\Exception $e) {
+            \App\Alert::PrintMessage($e->getMessage(), 'Danger');
+            }
+        }
+
+    }
+
 }

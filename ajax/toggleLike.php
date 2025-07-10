@@ -1,14 +1,15 @@
 <?php
+session_start();
 require_once('../vendor/autoload.php');
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 ini_set('error_log', __DIR__ . '/../../ajax_errors.log');
+
 try {
     $postsObj = new \App\Posts();
     
     // Check if user is logged in
-    session_start();
-    if (!isset($_SESSION['userId'])) {
+    if (!isset($_SESSION['userID'])) {
         throw new Exception('You must be logged in to like posts');
     }
     
@@ -18,7 +19,7 @@ try {
     }
     
     $postId = (int)$_POST['postId'];
-    $userId = (int)$_SESSION['userId'];
+    $userId = (int)$_SESSION['userID'];
     
     // Toggle like status
     $action = $postsObj->toggleLike($postId, $userId);
@@ -33,9 +34,3 @@ try {
         'message' => $e->getMessage()
     ]);
 }
-ob_end_clean();
-echo json_encode([
-    'status' => 'success',
-    'message' => 'Post created successfully',
-    'postId' => $result['postId'] // Fixed key
-]);

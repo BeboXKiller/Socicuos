@@ -260,14 +260,14 @@ class Authenticate
                 $rowArr = $resultObject->fetch_assoc();                
                 if (password_verify($password, $rowArr["password"])) {
                     // Store user data in session
-                    $_SESSION['userID'] = $rowArr["id"]; 
+                    $_SESSION['userID'] = $rowArr["id"];
                     $_SESSION['userName'] = $rowArr["username"];
                     $_SESSION['profilePic'] = $rowArr["profile_pic"];
                     $_SESSION['bio'] = $rowArr["bio"];
                     $_SESSION['createdAt'] = $rowArr["created_at"];
                     
                     \App\Alert::PrintMessage("Welcome Back, " . $rowArr['username'], 'Normal');
-                    header('location: index.php');
+                    header('location: ../index.php');
                     exit();
                 } else {
                     throw new \Exception('Wrong password');
@@ -283,7 +283,7 @@ class Authenticate
         if(isset($_GET['logout'])) {
             session_unset();
             session_destroy();
-            header("location: SignIn.php");
+            header("location: /Socicuos/Pages/SignIn.php");
             exit();
         }
     }

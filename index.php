@@ -3,6 +3,7 @@
     require_once('vendor/autoload.php');
         use App\Authenticate;
         use App\PostsUtility;
+        use App\UserInfoUtility;
         // Get current section
         $section = $_GET['section'] ?? 'feed';
 
@@ -11,8 +12,37 @@
         $authObj->logOut();
 
         $userId = $_SESSION['userID'];
-        $postManager = new PostsUtility();
+        $postManager = new \App\Posts();
         $initialPosts = $postManager->getNewsFeed($userId, 10, 0);
+            
+            // Convert posts to HTML for initial display
+            $postsHtml = '';
+            $userInfoUtility = new UserInfoUtility();
+            
+            foreach ($initialPosts as $post) {
+                $isLiked = $postManager->isLikedByUser($post['id'], $_SESSION['userID']);
+                $likeCount = $postManager->getLikeCount($post['id']);
+                
+                // Get the target user's username if this post was posted to someone
+                $targetUsername = 'None';
+                if ($post['user_to'] != $post['added_by']) {
+                    $targetUserInfo = $userInfoUtility->getUserInfoById($post['user_to']);
+                    $targetUsername = $targetUserInfo['username'] ?? 'Unknown';
+                }
+                
+                $postsHtml .= \App\PostsUtility::UserPost(
+                    $post['id'],
+                    $post['username'],
+                    $targetUsername,
+                    $post['title'],
+                    $post['content'],
+                    $post['profile_pic'] ?? null,
+                    $post['created_at'] ?? null,
+                    $isLiked,
+                    $likeCount,
+                    $post['image'] ?? null
+                );
+            }
         
 ?>
 
@@ -30,7 +60,7 @@
     <script src="/Socicuos/assets/js/solid.js"></script>
     <script src="/Socicuos/assets/js/brands.js"></script>
     <script src="/Socicuos/assets/js/alert.js"></script>
-    <script src="/Socicuos/assets/js/newsFeed.js"></script>]
+    <script src="/Socicuos/assets/js/newsFeed.js"></script>
     <script src="/Socicuos/assets/js/createPosts.js"></script>
     <script src="/Socicuos/assets/js/getUserInfo.js"></script>
 
@@ -107,6 +137,7 @@
                          <!-- Create Post -->
                         <div class="bg-white rounded-lg shadow p-4 mb-6">
                             <form id="createPostForm" class="space-y-4" enctype="multipart/form-data" method="POST" >
+                                <input type="hidden" id="userTo" name="userTo" value="<?php echo htmlspecialchars($requested_username); ?>">
                                 <div class="space-y-4">
                                     <div class="flex items-center space-x-4">
                                         <?php echo \App\UserInfoUtility::userIcon($_SESSION['userName'], 'w-10 h-10 text-lg'); ?>
@@ -150,7 +181,7 @@
 
                         <!-- Posts Feed -->
                         <div id="news-feed-container" class="news-feed-container space-y-4">
-                            <?= $initialPosts['html'] ?>
+                            <?= $postsHtml ?>
                         </div>
                         
                         <!-- End of posts indicator -->

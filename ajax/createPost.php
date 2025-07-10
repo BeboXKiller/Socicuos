@@ -1,4 +1,5 @@
 <?php
+session_start();
 ob_start();
 require_once('../vendor/autoload.php');
 
@@ -24,6 +25,18 @@ try {
     $postsObj = new \App\Posts();
     $title = trim($_POST['title']);
     
+    $userTo = $_POST['userTo'] ?? 'None';
+    $userTo_id = null; // Will be set to userId if 'None' or null
+    
+    if ($userTo !== 'None' && $userTo !== '') {
+        $userObj = new \App\UserInfoUtility();
+        $profile_data = $userObj->getUserInfo($userTo);
+        $userTo_id = $profile_data['id'] ?? null;
+        if ($userTo_id === null) {
+            throw new Exception('Recipient user not found');
+        }
+    }
+    
     // Handle image upload if present
     $imagePath = null;
     if ($imageProvided && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
@@ -35,7 +48,7 @@ try {
     }
     
     // Create the post
-    $result = $postsObj->createPost($_SESSION['userID'], $title, $content, $imagePath); 
+    $result = $postsObj->createPost($_SESSION['userID'], $userTo_id, $title, $content, $imagePath); 
     var_dump($result); // Debugging output
     $unexpectedOutput = ob_get_contents();
     if (!empty($unexpectedOutput)) {

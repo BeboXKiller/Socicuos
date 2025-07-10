@@ -1,12 +1,6 @@
 $(document).ready(function() {
-    const $createPostButton = $('#createPostButton');
+   
     const $createPostForm = $('#createPostForm');
-    const $imagePreview = $('#imagePreview');
-
-    const $postsContainer = $('#news-feed-container');
-
-    
-    
     
     // Add helper function
     function showError(message) {
@@ -27,6 +21,8 @@ $(document).ready(function() {
             const title = $('input[name="title"]').val().trim();
             const content = $('textarea[name="content"]').val().trim();
             const imageFile = $('input[name="image"]').prop('files')[0];
+            const userTo = $('#userTo').val();
+            console.log(userTo)
             
             // Validate inputs
             if (!title || !content) 
@@ -41,6 +37,7 @@ $(document).ready(function() {
             
             // Create FormData
             const formData = new FormData();
+            formData.append('userTo', userTo);
             formData.append('title', title);
             formData.append('content', content);
             if (imageFile) formData.append('image', imageFile);
@@ -53,7 +50,6 @@ $(document).ready(function() {
                 processData: false,
                 contentType: false,
                 success: function(data) { 
-                    console.log(data);
                     if (data.status === 'success') {
                         // Create and display alert
                         const alertHtml = `
@@ -65,16 +61,10 @@ $(document).ready(function() {
                         `;
                         $('body').append(alertHtml);
 
-                        $('<div>', {
-                            id: 'newPost',
-                            html: $(data.postHtml)
-                        }).appendTo('#news-feed-container');
-                        
                         // Reset form
                         $('#createPostForm')[0].reset();
                         $('#imagePreview').addClass('hidden').find('img').attr('src', '');
                         $('input[name="image"]').val('');
-                        // location.reload();
                         
                         // Prepend new post to feed
                         if (data.postHtml) {
@@ -92,7 +82,7 @@ $(document).ready(function() {
                         showAlert(data.message || 'Error creating post', 'error');
                     }
                 },
-                error: function(xhr) {
+                error: function showError(xhr) {
                     try {
                         // Handle cases where error response is JSON
                         const errorData = JSON.parse(xhr.responseText);

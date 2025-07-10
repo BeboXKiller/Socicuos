@@ -34,7 +34,7 @@ class FormUtility {
         );
     }
 
-    public static function textFieldUpdate($name, $label, $type = 'text', $required = false, $currentValue = '') {
+    public static function textFieldUpdate($name, $label, $type = '', $required = false, $currentValue = '') {
         $baseClasses = 'w-full px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base';
         
         // Special styling for username field

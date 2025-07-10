@@ -103,12 +103,18 @@ class PostsUtility extends Posts {
      * @param string|null $image URL of an image in the post, if any
      * @return string HTML representation of the post
      */    
-    public static function UserPost($postId, $username, $title, $content, $profilePic = null, $createdAt = null, $isLiked = false, $likeCount = 0, $image = null)
+    public static function UserPost($postId, $username, $userTo, $title, $content, $profilePic = null, $createdAt = null, $isLiked = false, $likeCount = 0, $image = null)
     {
         $timeAgo = '';
         if ($createdAt) {
             $postTime = strtotime($createdAt);
             $timeAgo = self::human_time_diff($postTime);
+        }
+
+        // Add target user info if post was made to someone's wall
+        $targetUserInfo = '';
+        if ($userTo && $userTo !== 'None' && $userTo !== $username) {
+            $targetUserInfo = '<span class="text-sm text-gray-500"> → <a href="' . htmlspecialchars($userTo) . '" class="profile-link text-blue-600 hover:text-blue-800">' . htmlspecialchars($userTo) . '</a></span>';
         }
         
         $html = '<div class="bg-white rounded-lg shadow" data-post-id="' . htmlspecialchars($postId) . '">
@@ -119,9 +125,10 @@ class PostsUtility extends Posts {
                         
                     ' . \App\UserInfoUtility::userIcon(htmlspecialchars($username), 'w-12 h-12 text-lg') . '
                     </a>
+                    
                     <div class="flex-1">
                         <a href="'.  htmlspecialchars($username) .'" 
-                        class="profile-link font-semibold text-gray-900  cursor-pointer">' . htmlspecialchars($username) . '</a>
+                        class="profile-link font-semibold text-gray-900  cursor-pointer">' . htmlspecialchars($username) . '</a>' . $targetUserInfo . '
                         <p class="text-sm text-gray-500">' . $timeAgo . '</p>
                     </div>
                 </div>
@@ -143,11 +150,11 @@ class PostsUtility extends Posts {
                 <!-- Post Actions -->
                 <div class="flex items-center space-x-4 pt-3 border-t">
                     <button class="js-like-button flex items-center space-x-2 text-gray-500 hover:text-blue-600 transition-colors' . ($isLiked ? ' text-blue-600' : '') . '">
-                        <i class="' . ($isLiked ? 'fa' : 'fas') . ' fa-heart"></i>
+                        <i class="' . ($isLiked ? 'fas' : 'far') . ' fa-heart"></i>
                         <span class="js-like-count">' . $likeCount . '</span>
                     </button>
                     <button class="flex items-center space-x-2 text-gray-500 hover:text-blue-600 transition-colors">
-                        <i class="fa fa-comment"></i>
+                        <i class="fas fa-comment"></i>
                         <span>Comment</span>
                     </button>
                 </div>
@@ -168,10 +175,10 @@ class PostsUtility extends Posts {
     public function getNewsFeed($userId, $limit = 20, $offset = 0) {
         $query = "SELECT p.*, u.username, u.profile_pic 
                 FROM posts p 
-                JOIN users u ON p.user_id = u.id 
-                WHERE p.user_id = ? 
-                    OR p.user_id IN (SELECT user2_id FROM friends WHERE user1_id = ? AND status = 'accepted')
-                    OR p.user_id IN (SELECT user1_id FROM friends WHERE user2_id = ? AND status = 'accepted')
+                JOIN users u ON p.added_by = u.id 
+                WHERE p.added_by = ? 
+                    OR p.added_by IN (SELECT user2_id FROM friends WHERE user1_id = ? AND status = 'accepted')
+                    OR p.added_by IN (SELECT user1_id FROM friends WHERE user2_id = ? AND status = 'accepted')
                 ORDER BY p.created_at DESC 
                 LIMIT ? OFFSET ?";
         
@@ -186,14 +193,28 @@ class PostsUtility extends Posts {
         
         $postsHtml = '';
         $hasMore = false;
+        $userInfoUtility = new \App\UserInfoUtility();
         
         while ($row = $result->fetch_assoc()) {
+            // Skip post if either the author or target user has a closed account
+            if ($userInfoUtility->isClosed($row['added_by']) || $userInfoUtility->isClosed($row['user_to'])) {
+                continue; // Skip this post and continue searching
+            }
+            
             $isLiked = $this->isLikedByUser($row['id'], $userId);
             $likeCount = $this->getLikeCount($row['id']);
+            
+            // Get the target user's username if this post was posted to someone
+            $targetUsername = 'None';
+            if ($row['user_to'] && $row['user_to'] != $row['added_by']) {
+                $targetUserInfo = $userInfoUtility->getUserInfoById($row['user_to']);
+                $targetUsername = $targetUserInfo['username'] ?? 'Unknown';
+            }
             
             $postsHtml .= self::UserPost(
                 $row['id'],
                 $row['username'],
+                $targetUsername,
                 $row['title'],
                 $row['content'],
                 $row['profile_pic'] ?? null,
